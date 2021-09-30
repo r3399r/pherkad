@@ -1,0 +1,111 @@
+{
+  "extends": [
+    "tslint:recommended",
+    "tslint-react",
+    "tslint-microsoft-contrib/recommended"
+  ],
+  "rulesDirectory": [
+    "node_modules/tslint-microsoft-contrib"
+  ],
+  "linterOptions": {
+    "exclude": [
+      "src/react-app-env.d.ts"
+    ]
+  },
+  "rules": {
+    "align": [
+      true,
+      "parameters",
+      "statements"
+    ],
+    "array-type": false,
+    "arrow-return-shorthand": [
+      true,
+      "multiline"
+    ],
+    "ban-types": false,
+    "curly": [
+      true,
+      "as-needed"
+    ],
+    "eofline": true,
+    "export-name": false,
+    "function-name": false,
+    "import-name": false,
+    "import-spacing": true,
+    "indent": [
+      true,
+      "spaces"
+    ],
+    "insecure-random": false,
+    "linebreak-style": [
+      true,
+      "LF"
+    ],
+    "max-func-body-length": false,
+    "max-line-length": false,
+    "newline-before-return": true,
+    "no-console": [
+      true,
+      "log"
+    ],
+    "no-relative-imports": [
+      true,
+      "allow-siblings"
+    ],
+    "no-suspicious-comment": false,
+    "no-var-requires": false,
+    "object-literal-key-quotes": [
+      true,
+      "as-needed"
+    ],
+    "ordered-imports": true,
+    "react-a11y-input-elements": false,
+    "semicolon": [
+      true,
+      "always"
+    ],
+    "typedef": [
+      true,
+      "arrow-parameter",
+      "call-signature",
+      "paramter",
+      "property-declaration",
+      "member-variable-declaration"
+    ],
+    "typedef-whitespace": [
+      true,
+      {
+        "call-signature": "nospace",
+        "index-signature": "nospace",
+        "parameter": "nospace",
+        "property-declaration": "nospace",
+        "variable-declaration": "nospace"
+      },
+      {
+        "call-signature": "onespace",
+        "index-signature": "onespace",
+        "parameter": "onespace",
+        "property-declaration": "onespace",
+        "variable-declaration": "onespace"
+      }
+    ],
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-pascal-case"
+    ],
+    "whitespace": {
+      "options": [
+        "check-branch",
+        "check-decl",
+        "check-operator",
+        "check-separator",
+        "check-type",
+        "check-typecast"
+      ]
+    },
+    "non-literal-require": false
+  }
+}
