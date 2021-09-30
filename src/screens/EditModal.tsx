@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
+import { TYPE } from 'src/constant/Accounting';
 import { RootState } from 'src/redux/store';
 import { addAccounting, editAccounting } from 'src/redux/walletSlice';
 
@@ -15,7 +16,7 @@ type Props = {
 const EditModal = ({ closeModal, target }: Props) => {
   const dispatch = useDispatch();
   const wallet = useSelector((rootState: RootState) => rootState.wallet);
-  const [type, setType] = useState<string>('add');
+  const [type, setType] = useState<TYPE>(TYPE.ADD);
   const [date, setDate] = useState<Date>(new Date());
   const [amount, setAmount] = useState<number>();
   const [note, setNote] = useState<string>('');
@@ -45,7 +46,7 @@ const EditModal = ({ closeModal, target }: Props) => {
 
   const showDatepicker = () => setShow(true);
 
-  const onValueChange = (newValue: string) => setType(newValue);
+  const onTypeChange = (newValue: string) => setType(newValue as TYPE);
 
   const onSubmit = () => {
     const accounting = { type, date: moment(date).valueOf(), amount: amount || 0, note };
@@ -62,11 +63,11 @@ const EditModal = ({ closeModal, target }: Props) => {
 
   return (
     <View style={styles.container}>
-      <RadioButton.Group onValueChange={onValueChange} value={type}>
+      <RadioButton.Group onValueChange={onTypeChange} value={type}>
         <View style={styles.radioGroup}>
           <RadioButton.Item
             label="儲值"
-            value="add"
+            value={TYPE.ADD}
             color="#005A9C"
             style={styles.radioItem}
             labelStyle={styles.text}
@@ -74,7 +75,7 @@ const EditModal = ({ closeModal, target }: Props) => {
           />
           <RadioButton.Item
             label="扣錢"
-            value="minus"
+            value={TYPE.MINUS}
             color="#005A9C"
             style={styles.radioItem}
             labelStyle={styles.text}

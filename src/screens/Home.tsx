@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
+import { TYPE } from 'src/constant/Accounting';
 import { Accounting } from 'src/model/Accounting';
 import { RootState } from 'src/redux/store';
 import { deleteAccounting } from 'src/redux/walletSlice';
@@ -80,8 +81,8 @@ const Home = () => {
               <Text style={styles.item}>
                 {moment(v.date).format('YYYY-MM-DD')} ({getWeekdayInChinese(moment(v.date).day())})
               </Text>
-              <Text style={[styles.item, v.type === 'minus' ? styles.red : styles.green]}>
-                {v.type === 'minus' ? '-' : ''}
+              <Text style={[styles.item, v.type === TYPE.MINUS ? styles.red : styles.green]}>
+                {v.type === TYPE.MINUS ? '-' : ''}
                 {v.amount}
               </Text>
               <Text style={styles.item}>{v.note || '-'}</Text>

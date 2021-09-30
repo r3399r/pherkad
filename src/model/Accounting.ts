@@ -1,5 +1,7 @@
+import { TYPE } from 'src/constant/Accounting';
+
 export type Accounting = {
-  type: string;
+  type: TYPE;
   date: number;
   amount: number;
   note: string;
