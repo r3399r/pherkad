@@ -1,5 +1,5 @@
 import moment from 'moment';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
   Button,
@@ -10,11 +10,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
 import { useDispatch, useSelector } from 'react-redux';
-import { TYPE } from 'src/constant/Accounting';
-import { Accounting } from 'src/model/Accounting';
+import { TYPE } from 'src/constant/Bill';
+import { deleteBill, getBills } from 'src/logic/BillService';
+import { Bill } from 'src/model/Bill';
 import { RootState } from 'src/redux/store';
-import { deleteAccounting } from 'src/redux/walletSlice';
+import { setBills } from 'src/redux/walletSlice';
 import { getWeekdayInChinese } from 'src/util/dateHelper';
 import EditModal from './EditModal';
 
@@ -23,6 +25,16 @@ const Home = () => {
   const wallet = useSelector((rootState: RootState) => rootState.wallet);
   const [editTarget, setEditTarget] = useState<number>();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    getBills()
+      .then((res: Bill[]) => {
+        dispatch(setBills(res));
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const onAdd = () => {
     setEditTarget(undefined);
@@ -35,7 +47,9 @@ const Home = () => {
   };
 
   const onDelete = (i: number) => () => {
-    dispatch(deleteAccounting(i));
+    deleteBill(wallet.bills[i].id).then((res: Bill[]) => {
+      dispatch(setBills(res));
+    });
   };
 
   const closeModal = () => {
@@ -62,7 +76,16 @@ const Home = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.current}>目前餘額: {wallet.balance}</Text>
+      <Spinner visible={isLoading} />
+      <Text style={styles.current}>
+        目前餘額:{' '}
+        {wallet &&
+          wallet.bills &&
+          wallet.bills.reduce(
+            (a: number, b: Bill) => (b.type === TYPE.MINUS ? a - b.amount : a + b.amount),
+            0,
+          )}
+      </Text>
       <View style={styles.button}>
         <Button title="新增帳目" onPress={onAdd} />
       </View>
@@ -72,23 +95,26 @@ const Home = () => {
         <Text style={styles.headItem}>項目</Text>
       </View>
       <ScrollView>
-        {wallet.accountings.map((v: Accounting, i: number) => (
-          <View key={i}>
-            <TouchableOpacity
-              style={[styles.row, i % 2 === 0 ? styles.even : styles.odd]}
-              onLongPress={onLongPress(i)}
-            >
-              <Text style={styles.item}>
-                {moment(v.date).format('YYYY-MM-DD')} ({getWeekdayInChinese(moment(v.date).day())})
-              </Text>
-              <Text style={[styles.item, v.type === TYPE.MINUS ? styles.red : styles.green]}>
-                {v.type === TYPE.MINUS ? '-' : ''}
-                {v.amount}
-              </Text>
-              <Text style={styles.item}>{v.note || '-'}</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+        {wallet &&
+          wallet.bills &&
+          wallet.bills.map((v: Bill, i: number) => (
+            <View key={v.id}>
+              <TouchableOpacity
+                style={[styles.row, i % 2 === 0 ? styles.even : styles.odd]}
+                onLongPress={onLongPress(i)}
+              >
+                <Text style={styles.item}>
+                  {moment(v.date).format('YYYY-MM-DD')} ({getWeekdayInChinese(moment(v.date).day())}
+                  )
+                </Text>
+                <Text style={[styles.item, v.type === TYPE.MINUS ? styles.red : styles.green]}>
+                  {v.type === TYPE.MINUS ? '-' : ''}
+                  {v.amount}
+                </Text>
+                <Text style={styles.item}>{v.note || '-'}</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
       </ScrollView>
       <Modal visible={showModal} animationType="slide">
         <EditModal closeModal={closeModal} target={editTarget} />

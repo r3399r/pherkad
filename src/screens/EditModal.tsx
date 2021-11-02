@@ -4,9 +4,11 @@ import React, { useEffect, useState } from 'react';
 import { Button, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
-import { TYPE } from 'src/constant/Accounting';
+import { TYPE } from 'src/constant/Bill';
+import { addBill, reviseBill } from 'src/logic/BillService';
+import { Bill } from 'src/model/Bill';
 import { RootState } from 'src/redux/store';
-import { addAccounting, editAccounting } from 'src/redux/walletSlice';
+import { setBills } from 'src/redux/walletSlice';
 
 type Props = {
   closeModal: () => void;
@@ -24,10 +26,10 @@ const EditModal = ({ closeModal, target }: Props) => {
 
   useEffect(() => {
     if (target !== undefined) {
-      setType(wallet.accountings[target].type);
-      setDate(new Date(wallet.accountings[target].date));
-      setAmount(wallet.accountings[target].amount);
-      setNote(wallet.accountings[target].note);
+      setType(wallet.bills[target].type);
+      setDate(new Date(wallet.bills[target].date));
+      setAmount(wallet.bills[target].amount);
+      setNote(wallet.bills[target].note || '-');
     }
   }, [target]);
 
@@ -49,9 +51,26 @@ const EditModal = ({ closeModal, target }: Props) => {
   const onTypeChange = (newValue: string) => setType(newValue as TYPE);
 
   const onSubmit = () => {
-    const accounting = { type, date: moment(date).valueOf(), amount: amount || 0, note };
-    if (target === undefined) dispatch(addAccounting(accounting));
-    else dispatch(editAccounting({ i: target, accounting }));
+    if (target === undefined)
+      addBill({
+        id: '',
+        type,
+        date: moment(date).valueOf(),
+        amount: amount || 0,
+        note: note || '-',
+      }).then((res: Bill[]) => {
+        dispatch(setBills(res));
+      });
+    else
+      reviseBill({
+        id: wallet.bills[target].id,
+        type,
+        date: moment(date).valueOf(),
+        amount: amount || 0,
+        note: note || '-',
+      }).then((res: Bill[]) => {
+        dispatch(setBills(res));
+      });
     closeModal();
   };
 
