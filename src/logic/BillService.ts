@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Bill } from 'src/model/Bill';
 
-const apiEndpoint = 'https://053rmjnia5.execute-api.ap-northeast-1.amazonaws.com/test';
+const apiEndpoint = 'https://5loda2r4b2.execute-api.ap-northeast-1.amazonaws.com/prod';
 
 export const getBills = async () => {
   const res = await axios.get<Bill[]>(`${apiEndpoint}/bill`);
