@@ -1,0 +1,169 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: "AWS::Serverless-2016-10-31"
+Description: pherkad deployment cloudformation script
+    
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+    Function:
+        Timeout: 30  # in seconds
+Parameters: 
+  LambdaExecutionRole:
+    Type: String
+    Default: celestial-service-execution-role
+    Description: The primary role in that gives the Lambda function permission to do its work.
+  NodeJsVer:
+    Type: String
+    Default: nodejs14.x
+  TargetEnvr:
+    Type: String
+    Default: dev
+    Description: The target environment for API Gateway deployment.
+
+Resources:
+    #######################################################
+    ##### Start of API Gateway and associated lambdas #####
+    #######################################################
+    ServerlessApi:
+      Type: AWS::Serverless::Api
+      Properties:
+        StageName: !Sub ${TargetEnvr}
+        EndpointConfiguration: REGIONAL
+        DefinitionBody: {
+            "swagger": "2.0",
+            "info": {
+              "version": "2020-01-06T07:45:41Z",
+              "title": !Sub "${TargetEnvr}-celestial-pherkad-api"
+            },
+            "paths": {
+              "/bill": {
+                "get": {
+                  "produces": [
+                    "application/json"
+                  ],
+                  "responses": {
+                    "200": {
+                      "description": "200 response",
+                      "schema": {
+                        "$ref": "#/definitions/Empty"
+                      }
+                    }
+                  },
+                  "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "uri": !Sub "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:278497686406:function:${TargetEnvr}-pherkad-bill/invocations",
+                    "responses": {
+                      "default": {
+                        "statusCode": "200"
+                      }
+                    },
+                    "passthroughBehavior": "when_no_match",
+                    "contentHandling": "CONVERT_TO_TEXT",
+                    "type": "aws_proxy"
+                  }
+                },
+                "post": {
+                  "produces": [
+                    "application/json"
+                  ],
+                  "responses": {
+                    "200": {
+                      "description": "200 response",
+                      "schema": {
+                        "$ref": "#/definitions/Empty"
+                      }
+                    }
+                  },
+                  "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "uri": !Sub "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:278497686406:function:${TargetEnvr}-pherkad-bill/invocations",
+                    "responses": {
+                      "default": {
+                        "statusCode": "200"
+                      }
+                    },
+                    "passthroughBehavior": "when_no_match",
+                    "contentHandling": "CONVERT_TO_TEXT",
+                    "type": "aws_proxy"
+                  }
+                },
+                "put": {
+                  "produces": [
+                    "application/json"
+                  ],
+                  "responses": {
+                    "200": {
+                      "description": "200 response",
+                      "schema": {
+                        "$ref": "#/definitions/Empty"
+                      }
+                    }
+                  },
+                  "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "uri": !Sub "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:278497686406:function:${TargetEnvr}-pherkad-bill/invocations",
+                    "responses": {
+                      "default": {
+                        "statusCode": "200"
+                      }
+                    },
+                    "passthroughBehavior": "when_no_match",
+                    "contentHandling": "CONVERT_TO_TEXT",
+                    "type": "aws_proxy"
+                  }
+                },
+                "delete": {
+                  "produces": [
+                    "application/json"
+                  ],
+                  "responses": {
+                    "200": {
+                      "description": "200 response",
+                      "schema": {
+                        "$ref": "#/definitions/Empty"
+                      }
+                    }
+                  },
+                  "x-amazon-apigateway-integration": {
+                    "httpMethod": "POST",
+                    "uri": !Sub "arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/arn:aws:lambda:ap-northeast-1:278497686406:function:${TargetEnvr}-pherkad-bill/invocations",
+                    "responses": {
+                      "default": {
+                        "statusCode": "200"
+                      }
+                    },
+                    "passthroughBehavior": "when_no_match",
+                    "contentHandling": "CONVERT_TO_TEXT",
+                    "type": "aws_proxy"
+                  }
+                }
+              }
+            },
+            "definitions": {
+              "Empty": {
+                "type": "object",
+                "title": "Empty Schema"
+              }
+            }
+          }
+    LambdaBill:
+      Type: AWS::Serverless::Function
+      Properties:
+        Handler: index.bill
+        Runtime: !Sub ${NodeJsVer}
+        FunctionName: !Sub ${TargetEnvr}-pherkad-bill
+        Role: !Sub "arn:aws:iam::${AWS::AccountId}:role/${LambdaExecutionRole}"
+        CodeUri: ../../dist/webpack/lambda
+        MemorySize: 128
+        Environment:
+          Variables:
+            CLIENT_EMAIL: '{{resolve:ssm:prod-pherkad-client-email:1}}'
+            PRIVATE_KEY: '{{resolve:ssm:prod-pherkad-private-key:1}}'
+            SHEET_ID: '{{resolve:ssm:prod-pherkad-sheet-id:1}}'
+    InvokePermissionBill:
+      Type: AWS::Lambda::Permission
+      DependsOn: [ServerlessApi, LambdaBill]
+      Properties:
+          FunctionName: !Sub ${TargetEnvr}-pherkad-bill
+          Action: 'lambda:InvokeFunction'
+          Principal: apigateway.amazonaws.com
+          SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ServerlessApi}/*
