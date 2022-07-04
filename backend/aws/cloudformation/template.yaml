@@ -14,6 +14,8 @@ Parameters:
   NodeJsVer:
     Type: String
     Default: nodejs14.x
+  Project:
+    Type: String
   TargetEnvr:
     Type: String
     Default: dev
@@ -32,7 +34,7 @@ Resources:
             "swagger": "2.0",
             "info": {
               "version": "2020-01-06T07:45:41Z",
-              "title": !Sub "${TargetEnvr}-celestial-pherkad-api"
+              "title": !Sub "${Project}-${TargetEnvr}-api"
             },
             "paths": {
               "/bill": {
@@ -158,7 +160,7 @@ Resources:
           Variables:
             CLIENT_EMAIL: '{{resolve:ssm:prod-pherkad-client-email:1}}'
             PRIVATE_KEY: '{{resolve:ssm:prod-pherkad-private-key:1}}'
-            SHEET_ID: '{{resolve:ssm:prod-pherkad-sheet-id:1}}'
+            SHEET_ID: '{{resolve:ssm:prod-pherkad-sheet-id:2}}'
     InvokePermissionBill:
       Type: AWS::Lambda::Permission
       DependsOn: [ServerlessApi, LambdaBill]
